@@ -117,6 +117,13 @@
 
                 end = new Date(time.getTime() + 24 * 60 * 60 * 1000);
 
+                // Add null value if option is enabled
+                if (i.options.showNull) {
+                    item = $('<li>').addClass('ui-menu-item').appendTo(ul);
+                    $('<a>').addClass('ui-corner-all ' + i.options.nullValueCSSClass).text(i.options.nullValueLabel).appendTo(item);
+                    item.data('time-value', null);
+                }
+
                 while(time < end) {
                     if (widget._isValidTime(i, time)) {
                         item = $('<li>').addClass('ui-menu-item').appendTo(ul);
@@ -487,9 +494,11 @@
                             time = item.data('time-value');
                         }
 
-                        if (time.getTime() === selectedTime.getTime()) {
-                            widget.activate(i, item);
-                            return false;
+                        if (time != null) {
+                            if (time.getTime() === selectedTime.getTime()) {
+                                widget.activate(i, item);
+                                return false;
+                            }
                         }
                         return true;
                     });
@@ -578,7 +587,13 @@
                     if (silent) { return i; }
                 } else {
                     i.selectedTime = null;
+                    if (i.options.showNull) {
+                        i.element.val(i.options.nullValueLabel);
+                    }
                 }
+
+                // Trigger the onchange event for the input element
+                i.element.trigger('change');
 
                 // custom change event and change callback
                 // TODO: add documentation about this event
@@ -611,7 +626,8 @@
                 destructive = ['minHour', 'minMinutes', 'minTime',
                                'maxHour', 'maxMinutes', 'maxTime',
                                'startHour', 'startMinutes', 'startTime',
-                               'timeFormat', 'interval', 'dropdown'];
+                               'timeFormat', 'interval', 'dropdown',
+                               'showNull', 'nullValueLabel', 'nullValueCSSClass'];
 
 
                 $.each(options, function(name) {
@@ -642,6 +658,9 @@
             zindex: null,
             dropdown: true,
             scrollbar: false,
+            showNull: false,
+            nullValueLabel: 'N/A',
+            nullValueCSSClass: '',
             // callbacks
             change: function(/*time*/) {}
         };
